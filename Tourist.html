@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="tourist.css">
+</head>
+
+<body>
+
+
+    <div class="container">
+        <div class="row"></div> <!-- Data will be dynamically added here -->
+    </div>
+
+    <script type="module">
+        console.log("✅ Inline script is loading...");
+
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"; // Use a matching version
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyALNMNdmZ8AnMiUxmHc6QZArQmGDS67osE",
+            authDomain: "unveil-ctg.firebaseapp.com",
+            projectId: "unveil-ctg",
+            storageBucket: "unveil-ctg.firebasestorage.app",
+            messagingSenderId: "938479072237",
+            appId: "1:938479072237:web:3f203f0048a28d86666de4",
+            measurementId: "G-7KCG5MQY57"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log("✅ Firebase initialized!");
+
+        // Function to load tourist spots from Firestore
+        async function loadTouristSpots() {
+            console.log("🔄 Fetching tourist spots...");
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "tourist_spots"));
+                let container = document.querySelector(".row");
+
+                if (!container) {
+                    console.error("❌ Container '.row' not found!");
+                    return;
+                }
+
+                container.innerHTML = ""; // Clear previous content
+
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data();
+                    console.log("🔥 Data fetched:", data);
+                    let placeHTML = `
+                        <div class="image">
+                            <img src="${data.imageURL}" alt="${data.title}">
+                            <div class="details">
+                                <h2>${formatTitle(data.title)}</h2>
+                                <p>"${data.description}"</p>
+                                <div class="more">
+                                    <a href="${data.link}" class="read-more">Read<span>More</span></a>
+                                    <div class="icon-links">
+                                        <a href="#"><i class="fa-solid fa-heart"></i></a>
+                                        <a href="#"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="#"><i class="fa-solid fa-paperclip"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += placeHTML;
+                });
+
+                console.log("✅ Tourist spots loaded successfully!");
+            } catch (error) {
+                console.error("❌ Error loading tourist spots:", error);
+            }
+        }
+
+        // Function to format title
+        function formatTitle(title) {
+            let words = title.split(" ");
+            return words.length > 1
+                ? `${words[0]} <span>${words.slice(1).join(" ")}</span>`
+                : `<span>${title}</span>`;
+        }
+        // Load tourist spots when the page loads
+        window.addEventListener("load", loadTouristSpots);
+    </script>
+</body>
+</html>
